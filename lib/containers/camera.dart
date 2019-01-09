@@ -132,25 +132,18 @@ class _CameraScreenState extends State<CameraScreen> {
     final LabelDetector labelDetector = FirebaseVision.instance.labelDetector();
     final List<Label> labels = await labelDetector.detectInImage(visionImage);
 
-    List<String> labelTexts = new List();
-    for (Label label in labels) {
-      final String text = label.label;
-
-      var translation = await globals.translate(text);
-      print("translation $translation ?? text $text");
-      labelTexts.add(translation ?? text);
-    }
-
+    var translation = await globals.translate(labels.map((label)=>label.label).toList());
 
     final String uuid = Uuid().v1();
     final String downloadURL = await _uploadFile(uuid);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ItemsListScreen('photos')),
-    );
+    // Navigator.push(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => ItemsListScreen('photos')),
+    // );
+    Navigator.pop(context);
+    await globals.addItem(downloadURL, translation);
 
-    await globals.addItem(downloadURL, labelTexts);
   }
 
 

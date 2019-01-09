@@ -46,29 +46,29 @@ void logError(String code, String message) =>
   print('Error: $code\nError Message: $message');
 
 Future<void> addItem(String downloadURL, List<String> labels) async {
-  await Firestore.instance.collection('items').add(<String, dynamic> {
+  await Firestore.instance.collection('photos').add(<String, dynamic> {
     'downloadURL': downloadURL,
+    'title' : labels.first,
     'labels': labels
   });
 }
 
 // const _SCOPES = const [StorageApi.DevstorageReadOnlyScope];
-final apiKey = 'AIzaSyB1dhK2fO-yaQizCDV0ka9o4W7HsS6NVBw';
+final apiKey = 'AIzaSyCKx_BK6lYI2oXnhb4q-Tws6KiCBjLdPAw';
 
-Future<String> translate(String text ) async {
+FutureOr<List<String>> translate(List<String> input) async {
 
   final client = clientViaApiKey(apiKey);  
-  return translateCall(text, client);
+  return translateCall(input, client);
 
 }
 
-Future<String> translateCall(String text, http.Client httpClient) async {
+FutureOr<List<String>> translateCall(List<String> input, http.Client httpClient) async {
     
-  String input = text;
-  String output = "Я не знаю это слово";
+  List<String> output;
 
   var request = TranslateTextRequest.fromJson({
-    "q": [input],
+    "q": input,
     "target": "ru",
     "source": "en",
     "format": "text"
@@ -78,9 +78,8 @@ Future<String> translateCall(String text, http.Client httpClient) async {
     
     var googleApi = api.TranslateApi(httpClient);
     TranslationsListResponse result = await googleApi.translations.translate(request);
- 
-    print(result.translations.first.translatedText);
-    output = result.translations.first.translatedText;
+  
+    output = result.translations.map((translation)=>translation.translatedText).toList();
     
   } catch (error) {
     print(error.toString());
@@ -116,6 +115,5 @@ Future<String> translateCall(String text, http.Client httpClient) async {
 
 Future<void> speak(String text) async {
 
-  String translated = await translate(text);
-  flutterTts.speak(translated);
+  flutterTts.speak(text);
 }
